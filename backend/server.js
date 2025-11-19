@@ -19,11 +19,18 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'SafeBite API is running' });
 });
 
-// TODO: Add API routes
-// - Product routes: /api/products
-// - Transfer routes: /api/transfers
-// - Verification routes: /api/verification
-// - Auth routes: /api/auth
+// API Routes
+const productRoutes = require('./routes/products');
+const transferRoutes = require('./routes/transfers');
+const verificationRoutes = require('./routes/verification');
+const roleRoutes = require('./routes/roles');
+const qrRoutes = require('./routes/qr');
+
+app.use('/api/products', productRoutes);
+app.use('/api/transfers', transferRoutes);
+app.use('/api/verification', verificationRoutes);
+app.use('/api/roles', roleRoutes);
+app.use('/api/qr', qrRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
