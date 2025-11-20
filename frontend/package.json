@@ -1,0 +1,39 @@
+{
+  "name": "safebite-frontend",
+  "version": "1.0.0",
+  "description": "Frontend web application for SafeBite blockchain food traceability system",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext js,jsx"
+  },
+  "keywords": [
+    "blockchain",
+    "supply-chain",
+    "food-traceability",
+    "react",
+    "web3"
+  ],
+  "author": "SafeBite Team",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0",
+    "ethers": "^6.15.0",
+    "axios": "^1.7.7",
+    "qrcode.react": "^3.1.0",
+    "html5-qrcode": "^2.3.8"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.35.0"
+  }
+}
+
