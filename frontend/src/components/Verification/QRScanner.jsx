@@ -2,56 +2,271 @@
  * QRScanner Component
  * Component to scan QR codes for product verification
  * 
- * TODO: Implement QR code scanner
- * - Use html5-qrcode library
- * - Start/stop camera
- * - Handle scan results
- * - Navigate to product verification page
+ * Uses html5-qrcode library to scan QR codes from camera feed
+ * Handles camera permissions, scanning, and results
  */
 
 import { useState, useEffect, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
+import './QRScanner.css';
 
 /**
  * QRScanner Component
  * 
- * TODO:
- * 1. Create state for scanning status
- * 2. Create ref for scanner container
- * 3. Initialize Html5Qrcode in useEffect
- * 4. Start camera on mount
- * 5. Handle scan success - extract productId from QR data
- * 6. Navigate to verification page with productId
- * 7. Clean up scanner on unmount
- * 8. Return scanner UI with start/stop buttons
+ * @param {Function} onScan - Callback function when QR code is successfully scanned
+ *                            Receives the scanned data (product ID) as parameter
+ * 
+ * Features:
+ * - Camera access with permission handling
+ * - Real-time QR code scanning
+ * - Start/stop scanning controls
+ * - Error handling and user feedback
+ * - Automatic cleanup on unmount
  */
 export default function QRScanner({ onScan }) {
   const [isScanning, setIsScanning] = useState(false);
+  const [error, setError] = useState(null);
+  const [hasPermission, setHasPermission] = useState(null);
   const scannerRef = useRef(null);
   const html5QrCodeRef = useRef(null);
+  const scanAttemptsRef = useRef(0);
 
-  // TODO: Implement scanner initialization
+  /**
+   * Cleanup scanner on unmount
+   */
   useEffect(() => {
-    // TODO: Initialize Html5Qrcode
-    // TODO: Start scanning
-    // TODO: Cleanup on unmount
-  }, []);
+    return () => {
+      if (html5QrCodeRef.current && isScanning) {
+        stopScanning();
+      }
+    };
+  }, [isScanning]);
 
-  // TODO: Implement start scanning
+  /**
+   * Start scanning QR codes
+   * Requests camera permission and initializes scanner
+   */
   const startScanning = async () => {
-    // TODO: Start camera and scanning
+    if (!scannerRef.current) {
+      setError('Scanner container not found');
+      return;
+    }
+
+    try {
+      setError(null);
+      setIsScanning(true);
+      scanAttemptsRef.current = 0;
+
+      // Create Html5Qrcode instance
+      const html5QrCode = new Html5Qrcode(scannerRef.current.id);
+      html5QrCodeRef.current = html5QrCode;
+
+      // Configuration for scanning
+      const config = {
+        fps: 10, // Frames per second
+        qrbox: { width: 250, height: 250 }, // Scanning area size
+        aspectRatio: 1.0 // Square aspect ratio
+      };
+
+      // Start scanning with camera
+      // Try to get user-facing camera first, fallback to any camera
+      const cameras = await Html5Qrcode.getCameras();
+      
+      if (cameras && cameras.length > 0) {
+        // Prefer back camera (usually index 1) for better quality, fallback to first available
+        const cameraId = cameras.length > 1 ? cameras[1].id : cameras[0].id;
+        
+        await html5QrCode.start(
+          cameraId,
+          config,
+          (decodedText, decodedResult) => {
+            // Success callback - QR code scanned
+            handleScanSuccess(decodedText);
+          },
+          (errorMessage) => {
+            // Error callback - scanning error (not a fatal error, just no QR code detected)
+            // Only show error after multiple failed attempts
+            scanAttemptsRef.current++;
+            if (scanAttemptsRef.current > 10) {
+              // This is normal - just means no QR code is in view
+              // Don't show error for normal scanning attempts
+            }
+          }
+        );
+
+        setHasPermission(true);
+      } else {
+        throw new Error('No cameras found. Please ensure your device has a camera.');
+      }
+    } catch (err) {
+      console.error('Error starting scanner:', err);
+      setIsScanning(false);
+      
+      // Handle specific error cases
+      if (err.name === 'NotAllowedError' || err.message.includes('permission')) {
+        setError('Camera permission denied. Please allow camera access and try again.');
+        setHasPermission(false);
+      } else if (err.name === 'NotFoundError' || err.message.includes('camera')) {
+        setError('No camera found. Please ensure your device has a camera.');
+        setHasPermission(false);
+      } else if (err.message.includes('NotReadableError') || err.message.includes('already in use')) {
+        setError('Camera is already in use by another application. Please close other apps using the camera.');
+        setHasPermission(false);
+      } else {
+        setError(err.message || 'Failed to start camera. Please try again.');
+        setHasPermission(null);
+      }
+    }
   };
 
-  // TODO: Implement stop scanning
+  /**
+   * Stop scanning QR codes
+   * Stops camera and cleans up scanner instance
+   */
   const stopScanning = async () => {
-    // TODO: Stop camera and scanning
+    if (html5QrCodeRef.current) {
+      try {
+        await html5QrCodeRef.current.stop();
+        await html5QrCodeRef.current.clear();
+        html5QrCodeRef.current = null;
+        setIsScanning(false);
+        setError(null);
+        scanAttemptsRef.current = 0;
+      } catch (err) {
+        console.error('Error stopping scanner:', err);
+        // Force cleanup even if stop fails
+        html5QrCodeRef.current = null;
+        setIsScanning(false);
+      }
+    }
+  };
+
+  /**
+   * Handle successful QR code scan
+   * Extracts product ID and calls onScan callback
+   * 
+   * @param {string} decodedText - The decoded QR code text
+   */
+  const handleScanSuccess = (decodedText) => {
+    try {
+      // Try to parse as JSON first (in case QR contains structured data)
+      let productId = decodedText;
+      
+      try {
+        const parsed = JSON.parse(decodedText);
+        // If QR code contains JSON with productId field
+        if (parsed.productId) {
+          productId = parsed.productId;
+        } else if (parsed.id) {
+          productId = parsed.id;
+        }
+      } catch {
+        // Not JSON, use as-is
+      }
+
+      // Extract product ID from URL if QR contains URL
+      if (productId.includes('/verify/')) {
+        const match = productId.match(/\/verify\/(\d+)/);
+        if (match) {
+          productId = match[1];
+        }
+      }
+
+      // Stop scanning after successful scan
+      stopScanning();
+
+      // Call onScan callback with product ID
+      if (onScan && productId) {
+        onScan(productId.toString());
+      }
+    } catch (err) {
+      console.error('Error processing scanned QR code:', err);
+      setError('Failed to process scanned QR code. Please try again.');
+    }
+  };
+
+  /**
+   * Request camera permission
+   * Attempts to get camera access to check permissions
+   */
+  const requestPermission = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // Permission granted, stop the test stream
+      stream.getTracks().forEach(track => track.stop());
+      setHasPermission(true);
+      setError(null);
+      // Auto-start scanning after permission granted
+      startScanning();
+    } catch (err) {
+      setHasPermission(false);
+      if (err.name === 'NotAllowedError') {
+        setError('Camera permission denied. Please allow camera access in your browser settings.');
+      } else {
+        setError('Failed to access camera. Please check your browser settings.');
+      }
+    }
   };
 
   return (
-    <div>
-      {/* TODO: Implement scanner UI */}
-      <div ref={scannerRef} id="qr-reader"></div>
-      <p>QRScanner component - TODO: Implement</p>
+    <div className="qr-scanner">
+      <div className="qr-scanner-container">
+        <div 
+          ref={scannerRef} 
+          id="qr-reader" 
+          className={`qr-reader ${isScanning ? 'scanning' : ''}`}
+        >
+          {!isScanning && (
+            <div className="qr-scanner-placeholder">
+              <div className="qr-scanner-icon">📷</div>
+              <p className="qr-scanner-text">
+                {hasPermission === false 
+                  ? 'Camera access denied' 
+                  : 'Click "Start Scanning" to begin'}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="qr-scanner-controls">
+        {!isScanning ? (
+          <button
+            onClick={hasPermission === false ? requestPermission : startScanning}
+            className="btn-scan btn-start"
+            disabled={isScanning}
+          >
+            {hasPermission === false ? 'Grant Camera Permission' : 'Start Scanning'}
+          </button>
+        ) : (
+          <button
+            onClick={stopScanning}
+            className="btn-scan btn-stop"
+          >
+            Stop Scanning
+          </button>
+        )}
+      </div>
+
+      {error && (
+        <div className="qr-scanner-error">
+          <p>{error}</p>
+          {hasPermission === false && (
+            <button
+              onClick={requestPermission}
+              className="btn-request-permission"
+            >
+              Request Permission
+            </button>
+          )}
+        </div>
+      )}
+
+      {isScanning && (
+        <div className="qr-scanner-hint">
+          <p>Point your camera at the QR code</p>
+        </div>
+      )}
     </div>
   );
 }
