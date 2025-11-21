@@ -1,237 +1,335 @@
-# SafeBite: Blockchain-Based Food Supply Chain Verification System
+# SafeBite: Blockchain-Based Food Traceability System
 
-## Description
+## Overview
 
-SafeBite is a blockchain-based system designed to track food products from production to consumption. The system uses smart contracts deployed on the Ethereum blockchain to create an immutable record of each product's journey through the supply chain. This allows consumers and stakeholders to verify the origin, authenticity, and handling of food products at any point in the supply chain.
+SafeBite is an enterprise-grade blockchain solution for food supply chain traceability. The system provides end-to-end product tracking from production to consumption, ensuring transparency, authenticity, and regulatory compliance through immutable blockchain records.
 
 ## Key Features
 
-- **Role-Based Access Control**: The system manages five different roles (Producer, Distributor, Retailer, Regulator, and Consumer) with specific permissions for each role
-- **Product Registration**: Producers can register new products with unique identifiers and metadata
-- **Ownership Tracking**: Complete history of product ownership transfers is recorded on the blockchain
-- **Status Management**: Products move through statuses: Created, Shipped, Received, Stored, and Delivered
-- **Verification System**: Products can be verified for authenticity, quality, and regulatory compliance
-- **Complete Provenance**: All product events and transactions are permanently stored and can be retrieved
+- *Role-Based Access Control*: Five distinct roles (Producer, Distributor, Retailer, Regulator, Consumer) with granular permissions
+- *Product Lifecycle Management*: Complete tracking from registration through delivery
+- *Immutable Provenance Records*: All product events permanently stored on blockchain
+- *Quality & Compliance Verification*: Automated certificate generation and authenticity verification
+- *QR Code Integration*: Product identification and consumer verification via QR scanning
+- *Real-Time Status Tracking*: Product status updates throughout the supply chain
 
 ## System Architecture
 
-The system consists of four main components:
+The system is built on a four-tier architecture:
 
-1. **Smart Contracts**: Solidity contracts that define the business logic and access control rules
-   - `SafeBiteAccessRoles.sol`: Manages role assignments and permissions
-   - `SafeBiteSupplyChain.sol`: Handles product lifecycle, transfers, and verification
+### 1. Smart Contracts Layer
+Solidity smart contracts deployed on Ethereum-compatible blockchain:
+- *SafeBiteAccessRoles.sol*: Role-based access control and permission management
+- *SafeBiteSupplyChain.sol*: Core business logic for product lifecycle, transfers, and verification
 
-2. **Backend API**: Express.js server that provides REST API endpoints for frontend interaction
-   - Handles smart contract interactions using Ethers.js
-   - Provides QR code generation services
-   - Manages API routes for products, transfers, verification, and roles
+### 2. Backend API Layer
+Express.js REST API server providing:
+- Smart contract interaction abstraction
+- Business logic implementation
+- QR code generation services
+- Data formatting and validation
 
-3. **Frontend Application**: React.js web application with MetaMask integration
-   - Role-based dashboards for each stakeholder type
-   - QR code scanning and generation
-   - Product verification and provenance viewing
+### 3. Frontend Application Layer
+React.js web application featuring:
+- Role-based dashboards
+- MetaMask wallet integration
+- QR code scanning and generation
+- Real-time product verification
 
-4. **Blockchain Network**: Ethereum-compatible network (local Hardhat network for development)
+### 4. Blockchain Network Layer
+Ethereum-compatible network (Hardhat for local development, configurable for testnets/mainnet)
 
-## Dependencies
+## Project Structure
 
-### Required Software
 
-- **Node.js** (version 16 or higher)
-- **npm** or **yarn** package manager
-- **Git** for version control
-- **MetaMask** browser extension (for frontend testing)
+SafeBite-Blockchain-Food-Traceability/
+│
+├── contracts/                    # Smart contract source code
+│   ├── SafeBiteAccessRoles.sol   # Access control contract
+│   └── SafeBiteSupplyChain.sol   # Supply chain contract
+│
+├── backend/                      # Express.js API server
+│   ├── controllers/              # Request handlers
+│   ├── routes/                   # API route definitions
+│   ├── services/                 # Business logic layer
+│   ├── utils/                    # Utility functions
+│   └── server.js                 # Application entry point
+│
+├── frontend/                     # React.js web application
+│   └── src/
+│       ├── components/           # Reusable UI components
+│       ├── pages/                # Page-level components
+│       ├── services/             # API and blockchain services
+│       ├── hooks/                 # Custom React hooks
+│       └── utils/                # Helper functions
+│
+├── scripts/                      # Deployment scripts
+│   └── deploy-local.js           # Local network deployment
+│
+└── deployments/                  # Deployment artifacts
+    └── local.json                # Contract addresses and ABIs
 
-### Development Tools
 
-- **Hardhat**: Ethereum development environment for compiling and deploying contracts
-- **Ethers.js**: JavaScript library for interacting with Ethereum blockchain
-- **Express.js**: Web framework for backend API
-- **React.js**: Frontend framework
-- **Vite**: Build tool for frontend development
+## Role Definitions
 
-## Setup Instructions
+### PRODUCER
+- *Responsibilities*: Product registration, initial metadata creation, QR code generation
+- *Permissions*: Register products, view registered products, transfer to distributors
+- *Use Cases*: Food manufacturers, farms, processing facilities
 
-### Step 1: Clone the Repository
+### DISTRIBUTOR
+- *Responsibilities*: Product transportation, status updates, ownership transfers
+- *Permissions*: Receive products, update shipment status, transfer to retailers/consumers
+- *Use Cases*: Logistics companies, wholesale distributors
 
-```bash
+### RETAILER
+- *Responsibilities*: Inventory management, quality assessments, consumer sales
+- *Permissions*: Receive products, perform quality checks, transfer to consumers
+- *Use Cases*: Grocery stores, retail chains, markets
+
+### REGULATOR
+- *Responsibilities*: Compliance auditing, quality verification, system oversight
+- *Permissions*: View all products, perform compliance checks, perform quality checks
+- *Use Cases*: Government agencies, food safety inspectors, certification bodies
+
+### CONSUMER
+- *Responsibilities*: Product verification, provenance review
+- *Permissions*: Verify authenticity, view complete product history, scan QR codes
+- *Use Cases*: End consumers, verification services
+
+## Prerequisites
+
+- *Node.js* v16 or higher
+- *npm* v7 or higher (or yarn)
+- *MetaMask* browser extension (for frontend interaction)
+- *Git* (for version control)
+
+## Installation & Setup
+
+### 1. Clone Repository
+
+bash
 git clone https://github.com/jalpatel11/SafeBite-Blockchain-Food-Traceability.git
 cd SafeBite-Blockchain-Food-Traceability
-```
 
-### Step 2: Install Root Dependencies
 
-```bash
+### 2. Install Dependencies
+
+bash
+# Install root dependencies (Hardhat, deployment tools)
 npm install
-```
 
-This installs Hardhat and related development tools.
-
-### Step 3: Compile Smart Contracts
-
-```bash
-npx hardhat compile
-```
-
-This compiles the Solidity contracts and generates artifacts.
-
-### Step 4: Deploy Contracts Locally
-
-Deploy contracts to a local Hardhat network:
-
-```bash
-npm run deploy:local
-```
-
-This deploys both contracts and saves the addresses to `deployments/local.json`.
-
-### Step 5: Set Up Backend
-
-Navigate to the backend directory and install dependencies:
-
-```bash
+# Install backend dependencies
 cd backend
 npm install
+
+# Install frontend dependencies
+cd ../frontend
+npm install
+
+
+### 3. Start Local Blockchain
+
+bash
+# From project root
+npm run node
+
+
+This starts a local Hardhat network on http://127.0.0.1:8545 with Chain ID 1337.
+
+### 4. Deploy Smart Contracts
+
+In a new terminal:
+
+bash
+npm run deploy:local
+
+
+Contract addresses are saved to deployments/local.json.
+
+### 5. Configure Backend
+
+bash
+cd backend
 cp .env.example .env
-```
 
-Edit the `.env` file with contract addresses from `deployments/local.json`:
 
-```env
+Edit .env with contract addresses from deployments/local.json:
+
+env
 RPC_URL=http://127.0.0.1:8545
 ACCESS_CONTROL_CONTRACT_ADDRESS=<from deployments/local.json>
 SUPPLY_CHAIN_CONTRACT_ADDRESS=<from deployments/local.json>
 PORT=3000
-```
 
-Start the backend server:
 
-```bash
-npm run dev
-```
+Start backend server:
 
-The server runs on `http://localhost:3000`.
+bash
+npm start
 
-### Step 6: Set Up Frontend
 
-Navigate to the frontend directory and install dependencies:
+### 6. Configure Frontend
 
-```bash
+bash
 cd frontend
-npm install
 cp .env.example .env
-```
 
-Edit the `.env` file with contract addresses and API URL:
 
-```env
+Edit .env:
+
+env
 VITE_API_URL=http://localhost:3000
 VITE_ACCESS_CONTROL_CONTRACT_ADDRESS=<from deployments/local.json>
 VITE_SUPPLY_CHAIN_CONTRACT_ADDRESS=<from deployments/local.json>
 VITE_RPC_URL=http://127.0.0.1:8545
 VITE_CHAIN_ID=1337
-```
 
-Start the frontend development server:
 
-```bash
+Start frontend development server:
+
+bash
 npm run dev
-```
 
-The application runs on `http://localhost:5173`.
 
-## Project Structure
+### 7. Assign Roles
 
-```
-SafeBite-Blockchain-Food-Traceability/
-├── contracts/              # Smart contract source code
-│   ├── SafeBiteAccessRoles.sol
-│   └── SafeBiteSupplyChain.sol
-├── backend/                # Backend API server
-│   ├── controllers/        # Request handlers
-│   ├── routes/             # API route definitions
-│   ├── services/           # Business logic and contract interactions
-│   ├── utils/              # Utility functions
-│   ├── server.js           # Express server entry point
-│   └── package.json
-├── frontend/               # React frontend application
-│   ├── src/
-│   │   ├── components/     # React components
-│   │   ├── pages/          # Page components (dashboards)
-│   │   ├── services/       # API and contract services
-│   │   ├── hooks/          # Custom React hooks
-│   │   └── utils/          # Utility functions
-│   └── package.json
-├── scripts/                # Deployment scripts
-│   ├── deploy.js           # General deployment script
-│   └── deploy-local.js     # Local deployment script
-├── deployments/            # Deployment addresses
-│   └── local.json          # Local deployment information
-├── hardhat.config.js       # Hardhat configuration
-├── package.json            # Root project dependencies
-└── README.md               # This file
-```
+In a new terminal:
 
-## Smart Contract Components
+bash
+./assign-roles.sh
 
-### SafeBiteAccessRoles.sol
 
-This contract manages role-based access control for the system. It defines five roles and provides functions to grant, revoke, and check roles.
+This assigns roles to the default Hardhat test accounts.
 
-**Key Functions:**
-- `grantRole(address, Role)`: Assigns a role to an address
-- `revokeRole(address, Role)`: Removes a role from an address
-- `hasRole(address, Role)`: Checks if an address has a specific role
-- `getRole(address)`: Returns the role of an address
+### 8. Configure MetaMask
 
-### SafeBiteSupplyChain.sol
+1. Install MetaMask browser extension
+2. Add custom network:
+   - Network Name: Hardhat Local
+   - RPC URL: http://127.0.0.1:8545
+   - Chain ID: 1337
+   - Currency Symbol: ETH
+3. Import test accounts from ACCOUNTS_REFERENCE.md
+4. Connect wallet to the application
 
-This is the main contract that handles all product-related operations.
+## Technology Stack
 
-**Key Functions:**
-- `registerProduct()`: Registers a new product (Producer only)
-- `transferOwnership()`: Transfers product ownership between stakeholders
-- `updateStatus()`: Updates product status
-- `verifyAuthenticity()`: Verifies product authenticity
-- `performQualityCheck()`: Records quality assessments
-- `checkCompliance()`: Performs regulatory compliance checks
-- `getProductJourney()`: Returns product journey timeline
-- `getCompleteProvenance()`: Returns complete product history
+### Smart Contracts
+- *Solidity* ^0.8.0
+- *Hardhat* - Development environment
+- *Ethers.js* - Blockchain interaction
 
-## Development Status
+### Backend
+- *Express.js* - Web framework
+- *Ethers.js* - Smart contract interaction
+- *QRCode* - QR code generation
+- *CORS* - Cross-origin resource sharing
 
-- **Smart Contracts**: Fully implemented and tested
-- **Backend API**: Structure created with routes, controllers, and services. Implementation in progress.
-- **Frontend Application**: Structure created with components, pages, and services. Implementation in progress.
-- **Testing**: Test suite to be developed
-- **Documentation**: Basic documentation complete
+### Frontend
+- *React* ^18.0 - UI framework
+- *React Router* - Client-side routing
+- *Vite* - Build tool and dev server
+- *Ethers.js* - Blockchain interaction
+- *Axios* - HTTP client
+- *html5-qrcode* - QR code scanning
 
-## Usage
+## Core Functionality
 
-### For Producers
+### Product Registration
+Producers register products with metadata including name, batch ID, origin, and optional metadata hash. Each product receives a unique identifier.
 
-Producers can register new products through the frontend interface or by calling the smart contract directly. Each registered product receives a unique ID and can be tracked through the supply chain.
+### Ownership Transfers
+Products can be transferred between stakeholders with automatic status updates and transfer history recording.
 
-### For Distributors
+### Verification System
+- *Quality Checks*: Retailers and regulators perform quality assessments
+- *Compliance Checks*: Regulators verify regulatory compliance
+- *Authenticity Verification*: Automatic verification when quality and compliance checks pass
 
-Distributors receive products from producers and can transfer ownership to retailers or consumers. The system automatically updates product status when transfers occur.
+### Provenance Tracking
+Complete immutable history of:
+- Product registration events
+- Ownership transfers
+- Status updates
+- Verification records
 
-### For Retailers
+## API Documentation
 
-Retailers can receive products, perform quality checks, update product status, and transfer products to consumers.
+See backend/README.md for complete API endpoint documentation.
 
-### For Regulators
+## Development
 
-Regulators have access to view all products and can perform compliance checks. They can audit the complete supply chain history for any product.
+### Running Tests
 
-### For Consumers
+bash
+# Backend tests
+cd backend
+npm test
 
-Consumers can verify product authenticity by scanning QR codes or entering product IDs. They can view the complete product journey and provenance information.
+# Contract tests (if implemented)
+npm run test
+
+
+### Building for Production
+
+bash
+# Frontend production build
+cd frontend
+npm run build
+
+
+### Environment Variables
+
+See .env.example files in backend/ and frontend/ directories for required configuration.
+
+## Troubleshooting
+
+### Backend Connection Issues
+- Verify Hardhat node is running: npm run node
+- Check RPC_URL in backend .env
+- Ensure contracts are deployed: npm run deploy:local
+
+### Frontend Connection Issues
+- Verify backend is running on port 3000
+- Check VITE_API_URL in frontend .env
+- Ensure MetaMask is connected to Hardhat Local network
+
+### Role Assignment Issues
+- Run ./assign-roles.sh after deploying contracts
+- Verify backend is running before assigning roles
+- Check contract addresses match deployment
+
+### MetaMask Issues
+- Ensure Hardhat Local network is added (Chain ID: 1337)
+- Verify test accounts are imported
+- Check network connection in MetaMask
+
+## Security Considerations
+
+- Private keys should never be committed to version control
+- Development endpoints (/api/roles/grant-dev) are for local testing only
+- Production deployments require proper authentication and authorization
+- Smart contracts should be audited before mainnet deployment
 
 ## License
 
 Apache License 2.0
 
-## Contact
+## Documentation
 
-For questions or contributions, please open an issue on the GitHub repository.
+- backend/README.md - Backend API documentation
+- frontend/README.md - Frontend application documentation
+- ACCOUNTS_REFERENCE.md - Test account credentials
+- DEPLOYMENT_LOCAL.md - Local deployment guide
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## Support
+
+For issues, questions, or contributions, please open an issue on the GitHub repository.
