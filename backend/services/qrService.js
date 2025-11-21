@@ -16,21 +16,25 @@ class QRService {
    * 
    * @param {number} productId - Product ID
    * @param {string} baseUrl - Base URL for verification (e.g., http://localhost:5173)
-   * @returns {Promise<string>} QR code data URL or JSON string
+   * @returns {Promise<string>} QR code data URL string
    * 
-   * TODO:
-   * 1. Create QR data object with productId and verification URL
-   * 2. Convert to JSON string
-   * 3. Generate QR code image using QRCode.toDataURL()
-   * 4. Return data URL or buffer
+   * Creates QR data object with productId and verification URL, converts to JSON string,
+   * generates QR code image using QRCode.toDataURL(), and returns data URL string.
    */
   async generateQRCode(productId, baseUrl = 'http://localhost:5173') {
-    // TODO: Create QR data object
-    // Format: { productId: 123, verifyUrl: "http://localhost:5173/verify/123" }
+    // Create QR data object
+    const qrData = this.getQRCodeData(productId, baseUrl);
+    const qrDataString = JSON.stringify(qrData);
     
-    // TODO: Generate QR code image
-    // Use QRCode.toDataURL() to generate image
-    // Return data URL string
+    // Generate QR code image as data URL
+    const dataURL = await QRCode.toDataURL(qrDataString, {
+      errorCorrectionLevel: 'M',
+      type: 'image/png',
+      quality: 0.92,
+      margin: 1
+    });
+    
+    return dataURL;
   }
 
   /**
@@ -40,14 +44,23 @@ class QRService {
    * @param {string} baseUrl - Base URL for verification
    * @returns {Promise<Buffer>} QR code image buffer
    * 
-   * TODO:
-   * 1. Generate QR code using QRCode.toBuffer()
-   * 2. Return buffer for direct image response
+   * Creates QR data object, generates QR code using QRCode.toBuffer(),
+   * and returns buffer for direct image response.
    */
   async generateQRCodeBuffer(productId, baseUrl = 'http://localhost:5173') {
-    // TODO: Generate QR code buffer
-    // Use QRCode.toBuffer()
-    // Return buffer
+    // Create QR data object
+    const qrData = this.getQRCodeData(productId, baseUrl);
+    const qrDataString = JSON.stringify(qrData);
+    
+    // Generate QR code buffer
+    const buffer = await QRCode.toBuffer(qrDataString, {
+      errorCorrectionLevel: 'M',
+      type: 'image/png',
+      quality: 0.92,
+      margin: 1
+    });
+    
+    return buffer;
   }
 
   /**
@@ -57,13 +70,14 @@ class QRService {
    * @param {string} baseUrl - Base URL for verification
    * @returns {Object} QR code data object
    * 
-   * TODO:
-   * 1. Return JSON object with productId and verifyUrl
-   * 2. Frontend can use this to generate QR code
+   * Returns JSON object with productId and verifyUrl.
+   * Frontend can use this to generate QR code.
    */
   getQRCodeData(productId, baseUrl = 'http://localhost:5173') {
-    // TODO: Return JSON object
-    // { productId, verifyUrl: `${baseUrl}/verify/${productId}` }
+    return {
+      productId: productId,
+      verifyUrl: `${baseUrl}/verify/${productId}`
+    };
   }
 }
 
