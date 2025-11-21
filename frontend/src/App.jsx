@@ -10,51 +10,38 @@
  */
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useWeb3 } from './hooks/useWeb3';
-import { useRole } from './hooks/useRole';
-import ConnectWallet from './components/Wallet/ConnectWallet';
+import Navigation from './components/Common/Navigation';
+import Home from './pages/Home';
 import ProducerDashboard from './pages/ProducerDashboard';
 import DistributorDashboard from './pages/DistributorDashboard';
 import RetailerDashboard from './pages/RetailerDashboard';
 import RegulatorDashboard from './pages/RegulatorDashboard';
 import ConsumerDashboard from './pages/ConsumerDashboard';
+import ProductVerification from './pages/ProductVerification';
+import TransferProduct from './pages/TransferProduct';
 
 /**
  * App Component
  * 
- * TODO:
- * 1. Set up BrowserRouter
- * 2. Create routes for:
- *    - / (home/connect)
- *    - /producer (ProducerDashboard)
- *    - /distributor (DistributorDashboard - TODO: create)
- *    - /retailer (RetailerDashboard - TODO: create)
- *    - /regulator (RegulatorDashboard - TODO: create)
- *    - /consumer (ConsumerDashboard)
- *    - /verify/:productId (Product verification page - TODO: create)
- * 3. Add navigation component
- * 4. Handle role-based redirects
- * 5. Show ConnectWallet if not connected
+ * Main application component with routing and navigation.
  */
 function App() {
-  const { isConnected } = useWeb3();
-  const { role } = useRole();
 
   return (
     <BrowserRouter>
       <div className="App">
-        {/* TODO: Add navigation header */}
-        <ConnectWallet />
+        <Navigation />
         
         <Routes>
-          {/* TODO: Implement routes */}
-          <Route path="/" element={<div>Home - Select your role</div>} />
+          <Route path="/" element={<Home />} />
           <Route path="/producer" element={<ProducerDashboard />} />
           <Route path="/distributor" element={<DistributorDashboard />} />
           <Route path="/retailer" element={<RetailerDashboard />} />
           <Route path="/regulator" element={<RegulatorDashboard />} />
           <Route path="/consumer" element={<ConsumerDashboard />} />
-          {/* TODO: Add verify/:productId route */}
+          <Route path="/verify/:productId" element={<ProductVerification />} />
+          <Route path="/verify" element={<ProductVerification />} />
+          <Route path="/transfer" element={<TransferProduct />} />
         </Routes>
       </div>
     </BrowserRouter>
