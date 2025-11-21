@@ -15,8 +15,7 @@ The application follows a component-based architecture with clear separation of 
 - *Utils*: Shared utility functions
 
 ## Project Structure
-
-
+```
 frontend/
 │
 ├── src/
@@ -66,50 +65,49 @@ frontend/
 ├── index.html                    # HTML template
 ├── vite.config.js                # Vite configuration
 └── package.json                  # Dependencies
-
+```
 
 ## Setup
 
 ### Installation
 
+
 bash
+```
 npm install
-
-
+```
 ### Environment Configuration
 
 Copy the example environment file:
 
 bash
+```
 cp .env.example .env
-
-
+```
 Configure environment variables (Vite requires VITE_ prefix):
-
+```
 env
 VITE_API_URL=http://localhost:3000
 VITE_ACCESS_CONTROL_CONTRACT_ADDRESS=0x...
 VITE_SUPPLY_CHAIN_CONTRACT_ADDRESS=0x...
 VITE_RPC_URL=http://127.0.0.1:8545
 VITE_CHAIN_ID=1337
-
-
+```
 Contract addresses are available in ../deployments/local.json after deployment.
 
 ### Development Server
-
 bash
+```
 npm run dev
-
-
+```
 Application runs on http://localhost:5173 with hot module replacement.
 
 ### Production Build
 
 bash
+```
 npm run build
-
-
+```
 Generates optimized production build in dist/ directory.
 
 ## Application Flow
