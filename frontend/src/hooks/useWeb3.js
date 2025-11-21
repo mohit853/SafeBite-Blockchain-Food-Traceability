@@ -29,20 +29,77 @@ export function useWeb3() {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // TODO: Implement connect function
+  /**
+   * Connect to MetaMask wallet
+   * Sets loading state, calls web3Service.connectWallet(), and updates state.
+   */
   const connect = async () => {
-    // TODO: Set loading, call web3Service, update state
+    setIsLoading(true);
+    try {
+      const account = await web3Service.connectWallet();
+      setAccount(account);
+      setIsConnected(true);
+    } catch (error) {
+      console.error('Failed to connect wallet:', error);
+      setAccount(null);
+      setIsConnected(false);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // TODO: Implement disconnect function
+  /**
+   * Disconnect wallet
+   * Calls web3Service.disconnectWallet() and resets state.
+   */
   const disconnect = () => {
-    // TODO: Call web3Service.disconnect, reset state
+    web3Service.disconnectWallet();
+    setAccount(null);
+    setIsConnected(false);
   };
 
-  // TODO: Set up useEffect for initial connection check
+  /**
+   * Set up useEffect for initial connection check and listeners
+   * Checks if already connected on mount and sets up account/network change listeners.
+   */
   useEffect(() => {
-    // TODO: Check if already connected
-    // TODO: Set up account/network change listeners
+    let accountCleanup = null;
+    let chainCleanup = null;
+
+    // Check if already connected
+    const checkConnection = async () => {
+      const isConnected = await web3Service.checkConnection();
+      if (isConnected) {
+        setAccount(web3Service.getAccount());
+        setIsConnected(true);
+      }
+    };
+
+    checkConnection();
+
+    // Set up account change listener
+    accountCleanup = web3Service.onAccountsChanged((newAccount) => {
+      if (newAccount) {
+        setAccount(newAccount);
+        setIsConnected(true);
+      } else {
+        setAccount(null);
+        setIsConnected(false);
+      }
+    });
+
+    // Set up network change listener
+    chainCleanup = web3Service.onChainChanged((chainId) => {
+      // Reload page on network change (recommended by MetaMask)
+      window.location.reload();
+    });
+
+    // Cleanup listeners on unmount
+    return () => {
+      if (accountCleanup) accountCleanup();
+      if (chainCleanup) chainCleanup();
+    };
   }, []);
 
   return {

@@ -29,17 +29,34 @@ export function useRole() {
   const [roleName, setRoleName] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // TODO: Implement fetch role function
+  /**
+   * Fetch role from contract
+   * Sets loading state, calls contractService.getUserRole(),
+   * maps role number to role name, and updates state.
+   */
   const fetchRole = async () => {
     if (!account) {
       setRole(null);
       setRoleName(null);
+      setIsLoading(false);
       return;
     }
 
-    // TODO: Set loading, call contractService.getUserRole()
-    // TODO: Map role number to role name
-    // TODO: Update state
+    setIsLoading(true);
+    try {
+      const roleNumber = await contractService.getUserRole(account);
+      const roleNames = ['PRODUCER', 'DISTRIBUTOR', 'RETAILER', 'REGULATOR', 'CONSUMER'];
+      const name = roleNames[roleNumber] || 'UNKNOWN';
+
+      setRole(roleNumber);
+      setRoleName(name);
+    } catch (error) {
+      console.error('Failed to fetch role:', error);
+      setRole(null);
+      setRoleName(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // TODO: Set up useEffect to fetch role when account changes
